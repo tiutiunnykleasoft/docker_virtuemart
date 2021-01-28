@@ -1,0 +1,47 @@
+version: "3.2"
+services:
+  php:
+    build: './php/'
+    networks:
+      - backend
+    volumes:
+      - ./public_html/:/var/www/html/
+  apache:
+    build: './apache/'
+    depends_on:
+      - php
+      - mariadb
+    networks:
+      - frontend
+      - backend
+    ports:
+      - 8080:80
+    volumes:
+      - ./public_html/:/var/www/html/
+  mariadb:
+    image: mariadb:10.3
+    networks:
+      - backend
+    restart: always
+    ports:
+      - 3306:3306
+    volumes:
+      - ./public_html/database/:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: qwerty
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    networks:
+      - backend
+      - frontend
+    links:
+      - mariadb:db
+    ports:
+      - 8765:80
+    environment:
+      MYSQL_ROOT_PASSWORD: qwerty
+    depends_on:
+      - mariadb
+networks:
+  frontend:
+  backend:
